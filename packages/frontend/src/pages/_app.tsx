@@ -1,21 +1,22 @@
-import '@/styles/globals.css'
-import type { AppProps } from 'next/app'
+import Header from '@/components/Header';
+import '@/styles/globals.css';
+import {
+  RainbowKitProvider,
+  connectorsForWallets,
+  getDefaultWallets,
+  midnightTheme
+} from '@rainbow-me/rainbowkit';
 import '@rainbow-me/rainbowkit/styles.css';
 import {
-  getDefaultWallets,
-  RainbowKitProvider,
-  midnightTheme,
-  connectorsForWallets
-} from '@rainbow-me/rainbowkit';
-import {
   argentWallet,
-  trustWallet,
   ledgerWallet,
+  trustWallet,
 } from '@rainbow-me/rainbowkit/wallets';
-import { configureChains, createConfig, WagmiConfig } from 'wagmi';
-import { mainnet, polygon, optimism, arbitrum, aurora, gnosis, localhost, goerli } from 'wagmi/chains';
-import { publicProvider } from 'wagmi/providers/public';
+import type { AppProps } from 'next/app';
 import { Toaster } from "react-hot-toast";
+import { WagmiConfig, configureChains, createConfig } from 'wagmi';
+import { localhost } from 'wagmi/chains';
+import { publicProvider } from 'wagmi/providers/public';
 const toastOptions = {
   style: {
     background: "rgba(0, 0, 0)",
@@ -79,7 +80,7 @@ export default function App({ Component, pageProps }: AppProps) {
     <WagmiConfig config={wagmiConfig}>
       <RainbowKitProvider theme={midnightTheme()} chains={chains} appInfo={demoAppInfo}>
         <Toaster position="top-right" toastOptions={toastOptions} />
-
+        <Header />
         <Component {...pageProps} />
       </RainbowKitProvider>
     </WagmiConfig>
