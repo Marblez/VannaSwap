@@ -1,3 +1,9 @@
 [submodule "packages/uniswap-v4-hooks-vanna"]
 	path = packages/uniswap-v4-hooks-vanna
 	url = https://github.com/EazyReal/uniswap-v4-hooks-vanna.git
+[submodule "packages/v4-core-vanna"]
+	path = packages/v4-core-vanna
+	url = https://github.com/EazyReal/v4-core-vanna.git
+[submodule "packages/v4-periphery-vanna"]
+	path = packages/v4-periphery-vanna
+	url = https://github.com/EazyReal/v4-periphery-vanna.git
