@@ -1,3 +1,6 @@
 [submodule "packages/VannaSwapContracts"]
 	path = packages/VannaSwapContracts
 	url = https://github.com/EazyReal/VannaSwapContracts.git
+[submodule "packages/uniswap-v4-hooks-vanna"]
+	path = packages/uniswap-v4-hooks-vanna
+	url = git@github.com:EazyReal/uniswap-v4-hooks-vanna.git
