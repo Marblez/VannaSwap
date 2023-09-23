@@ -15,10 +15,19 @@ const Header = (props: Props) => {
                 }}>
                     <Image alt='logo' src='/logo.png' width={50} height={50} />
                 </div>
-                <div >
+                <div
+                    className='p-2 rounded-xl hover:bg-gray-400 hover:bg-opacity-20 cursor-pointer'
+                    onClick={() => {
+                        router.push('/swap')
+                    }}>
                     Swap
                 </div>
-                <div>
+                <div
+                    className='p-2 rounded-xl hover:bg-gray-400 hover:bg-opacity-20 cursor-pointer'
+
+                    onClick={() => {
+                        router.push('/pool')
+                    }}>
                     Pool
                 </div>
             </div>
