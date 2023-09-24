@@ -26,7 +26,7 @@ const ActionContainer = styled.div`
     display: flex;
     align-items: center;
 `
-const SwapContainer = styled.div`
+const SwapContainer = styled.div<{ focus: boolean }>`
     background-color: #1b1b1b;
     border-radius: 16px;
     color: rgb(155, 155, 155);
@@ -36,6 +36,7 @@ const SwapContainer = styled.div`
     line-height: 20px;
     padding: 16px;
     position: relative;
+    border:1px solid ${({ focus }) => (focus ? "#b8c0dc3d" : "rgb(27, 27, 27)")};
 
     
 `
@@ -48,6 +49,7 @@ const SwapInnerContainer = styled.div`
     width: initial;
     transition: height 1s ease 0s;
     will-change: height;
+
 `
 const SwitchContainer = styled.div`
     border-radius: 12px;
@@ -169,6 +171,7 @@ const MaxButton = styled.button`
     pointer-events: initial;
 `
 const PriceContainer = styled.div`
+    margin-top: 4px;
     border: 1px solid rgba(255, 255, 255, 0.07);
     border-radius: 16px;
     padding: 12px 16px;
@@ -208,15 +211,24 @@ const query = gql`
 const formatNumber = (num: number) => {
     return num.toLocaleString('en-US', { maximumFractionDigits: 2 })
 }
-
+const formatToken = (num: number) => {
+    if (Number.isInteger(num)) {
+        return num.toFixed(0)
+    } else {
+        //to make -9
+        return num.toFixed(9)
+    }
+}
 const Swap = (props: Props) => {
     const [disabled, setDisabled] = useState(false)
     const toggleButton = useCallback(() => {
         setDisabled((prev) => !prev)
     }, [])
     const [isFetching, setIsFetching] = useState(false)
-    const [inTokenAmount, setInTokenAmount] = useState(0)
-    const [outTokenAmount, setOutTokenAmount] = useState(0)
+    const [inTokenAmount, setInTokenAmount] = useState('')
+    const [outTokenAmount, setOutTokenAmount] = useState('')
+    const [inTokenFocus, setInTokenFocus] = useState(false)
+    const [outTokenFocus, setOutTokenFocus] = useState(false)
     const [ETHPrice, setETHPrice] = useState(0)
     const [USDCPrice, setUSDCPrice] = useState(0)
     const [ethBalance, setEthBalance] = useState(3.13)
@@ -225,13 +237,39 @@ const Swap = (props: Props) => {
     const [result, reexecuteQuery] = useQuery({
         query: query,
     });
+    const noInputAmount = !inTokenAmount || !outTokenAmount
     useEffect(() => {
+        if (!inTokenAmount && !outTokenAmount) return
         if (result.data) {
-            setETHPrice(result.data.pool.token0Price)
-            setUSDCPrice(result.data.pool.token1Price)
+            const _ETHPrice = Number(result.data.pool.token0Price)
+            const _USDCPrice = Number(result.data.pool.token1Price)
+            setETHPrice(_ETHPrice)
+            setUSDCPrice(_USDCPrice)
             setIsFetching(false)
+            if (inTokenFocus) {
+                console.log('in token focus')
+                if (order == Order.ETH) {
+                    const outTokenAmount = Number(inTokenAmount) * _ETHPrice
+
+                    setOutTokenAmount(formatToken(outTokenAmount))
+                } else {
+                    const outTokenAmount = Number(inTokenAmount) * _USDCPrice
+                    setOutTokenAmount(formatToken(outTokenAmount))
+                }
+            }
+            if (outTokenFocus) {
+                if (order == Order.ETH) {
+                    const inTokenAmount = Number(outTokenAmount) * _USDCPrice
+                    setInTokenAmount(formatToken(inTokenAmount))
+                } else {
+                    const inTokenAmount = Number(outTokenAmount) * _ETHPrice
+                    setInTokenAmount(formatToken(inTokenAmount))
+                }
+            }
+            console.log('reset price')
         }
-    }, [result])
+    }, [result, inTokenFocus, inTokenAmount, outTokenFocus, outTokenAmount, isFetching])
+    // console.log(result)
     return (
         <WidgetContainer>
             <WidgetBox>
@@ -244,7 +282,7 @@ const Swap = (props: Props) => {
                     </div>
                 </ActionContainer>
                 <div>
-                    <SwapContainer>
+                    <SwapContainer focus={inTokenFocus}>
                         <SwapInnerContainer>
                             <TextContainer>
                                 You pay
@@ -255,14 +293,25 @@ const Swap = (props: Props) => {
                                         display: 'flex',
                                         flexGrow: 1,
                                     }}>
-                                    <StyledInput placeholder="0" onChange={(value) => {
-                                        setInTokenAmount(Number(value.target.value))
-                                        setIsFetching(true)
-                                        reexecuteQuery()
-                                        setTimeout(() => {
-                                            setIsFetching(false)
-                                        }, 1000)
-                                    }} />
+                                    <StyledInput
+                                        value={inTokenAmount ? inTokenAmount : ''}
+                                        inputMode='decimal'
+                                        onFocus={() => {
+                                            setInTokenFocus(true)
+                                        }}
+                                        onBlur={() => {
+                                            setInTokenFocus(false)
+                                        }}
+                                        placeholder="0" onChange={(value) => {
+
+                                            setInTokenAmount(value.target.value)
+                                            if (isFetching) return
+                                            setIsFetching(true)
+                                            reexecuteQuery()
+                                            setTimeout(() => {
+                                                setIsFetching(false)
+                                            }, 1000)
+                                        }} />
                                 </div>
                                 <div>
                                     <TokenContainer>
@@ -301,13 +350,18 @@ const Swap = (props: Props) => {
                         else {
                             setOrder(Order.ETH)
                         }
+                        //swap in and out token amount
+                        const temp = inTokenAmount
+                        setInTokenAmount(outTokenAmount)
+                        setOutTokenAmount(temp)
+
                     }}>
                         <SwitchBox>
                             <BsArrowDownShort size={25} />
                         </SwitchBox>
                     </SwitchContainer>
                     <div>
-                        <SwapContainer>
+                        <SwapContainer focus={outTokenFocus}>
                             <SwapInnerContainer>
                                 <TextContainer>
                                     You receive
@@ -319,8 +373,17 @@ const Swap = (props: Props) => {
                                             flexGrow: 1,
                                         }}>
                                         <StyledInput placeholder="0"
+                                            inputMode='decimal'
+                                            value={outTokenAmount ? outTokenAmount : ''}
+
+                                            onFocus={() => {
+                                                setOutTokenFocus(true)
+                                            }}
+                                            onBlur={() => {
+                                                setOutTokenFocus(false)
+                                            }}
                                             onChange={(value) => {
-                                                setOutTokenAmount(Number(value.target.value))
+                                                setOutTokenAmount(value.target.value)
                                                 //add a timeout to fetch data
                                                 if (isFetching) return
                                                 setIsFetching(true)
@@ -360,18 +423,25 @@ const Swap = (props: Props) => {
                             </SwapInnerContainer>
                         </SwapContainer>
                     </div>
-                    <PriceContainer>
-                        <PriceBox>
-                            <Price>1 USDC = 0.00063 ETH </Price>
-                            <div></div>
-                        </PriceBox>
-                    </PriceContainer>
+                    {!noInputAmount &&
+                        <PriceContainer>
+                            <PriceBox>
+
+                                {isFetching ?
+                                    <Price>Fetching price...</Price> :
+                                    <Price>1 USDC = {USDCPrice.toFixed(5)} ETH </Price>
+
+                                }
+                                <div></div>
+                            </PriceBox>
+                        </PriceContainer>
+                    }
                     <div className='mt-2'>
                         <button
-                            className={`bg-[#22d3ee] font-bold text-lg py-4 px-6 rounded-2xl w-full inline-flex items-center justify-center focus:outline-none border border-transparent transition duration-300 ease-in-out ${disabled ? 'bg-[#1b1b1b] text-[#9b9b9b] cursor-not-allowed' : 'hover:opacity-80 text-white '}`}
-                            disabled={disabled}
+                            className={`font-bold text-lg py-4 px-6 rounded-2xl w-full inline-flex items-center justify-center focus:outline-none border border-transparent transition duration-300 ease-in-out ${(noInputAmount || isFetching) ? 'bg-[#1b1b1b] text-[#9b9b9b] cursor-not-allowed' : 'bg-[#22d3ee] hover:opacity-80 text-white '}`}
+                            disabled={noInputAmount || isFetching}
                             onClick={toggleButton}>
-                            {disabled ? "Enter a amount" : "Swap"}
+                            {noInputAmount ? "Enter a amount" : "Swap"}
                         </button>
                     </div>
                 </div>
