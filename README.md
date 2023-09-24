@@ -1,3 +1,14 @@
+# Deploy on Vanna
+- In optimism
+  - install dependencies (as the OP Stack website suggests)
+  - `make devnet-up`
+- In VannaSwap
+  - `cd packages/v4-vanna`
+  - `source .env`
+  - `forge script ./script/Vanna.s.sol --rpc-url $RPC_URL --broadcast --private-key $PRIVATE_KEY`
+
+---
+
 ## update submodule
 
 `git submodule update --remote`
@@ -33,8 +44,8 @@ git submodule update`
 - change `remappings.txt` 
   - `-lib/v4-periphery:forge-std/=lib/v4-periphery/lib/forge-std/src/`
   - `+lib/v4-periphery:forge-std/=lib/forge-std/src/`
-- set `.env`
-- forge script ./script/Vanna.s.sol --rpc-url $RPC_URL --broadcast --private-key $PRIVATE_KEY
+- `source .env`
+- `forge script ./script/Vanna.s.sol --rpc-url $RPC_URL --broadcast --private-key $PRIVATE_KEY`
 
 ---
 
@@ -43,7 +54,7 @@ git submodule update`
 
 ---
 
-## Getting the price
+## Getting the price from the graph
 - https://thegraph.com/hosted-service/subgraph/uniswap/uniswap-v3
 - query using
 ```
