@@ -34,3 +34,29 @@ git submodule update`
 
 ## PoolManager Key Functions
 - `swap`
+
+---
+
+## Getting the price
+- https://thegraph.com/hosted-service/subgraph/uniswap/uniswap-v3
+- query using
+```
+{
+  pool(id: "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8") {
+    tick
+    token0 {
+      symbol
+      id
+      decimals
+    }
+    token1 {
+      symbol
+      id
+      decimals
+    }
+    feeTier
+    sqrtPrice
+    liquidity
+  }
+}
+```
