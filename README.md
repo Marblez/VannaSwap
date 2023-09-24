@@ -15,6 +15,12 @@
 git submodule init
 git submodule update`
 
+## recursive reset
+`git submodule foreach --recursive git reset --hard`
+
+---
+
+
 ## deploy create2 address
 - see https://github.com/Arachnid/deterministic-deployment-proxy
 - `cast send --private-key $PRIVATE_KEY 0x3fab184622dc19b6109349b94811493bf2a45362 --value 0.1ether`
@@ -28,7 +34,7 @@ git submodule update`
   - `-lib/v4-periphery:forge-std/=lib/v4-periphery/lib/forge-std/src/`
   - `+lib/v4-periphery:forge-std/=lib/forge-std/src/`
 - set `.env`
-- forge script ./script/Counter.s.sol --rpc-url $RPC_URL --broadcast --private-key $PRIVATE_KEY
+- forge script ./script/Vanna.s.sol --rpc-url $RPC_URL --broadcast --private-key $PRIVATE_KEY
 
 ---
 
