@@ -4,12 +4,12 @@ import { MdSettings } from 'react-icons/md';
 import { BsArrowDownShort, BsArrowUpShort } from 'react-icons/bs';
 import Image from 'next/image';
 import { gql, useQuery } from 'urql';
-import { poolKey } from '@/constant/uniswap';
+import { MAX_PRICE_LIMIT, MIN_PRICE_LIMIT, poolKey } from '@/constant/uniswap';
 import { ethers } from 'ethers';
 import { SwapParams, swap } from '@/utils/actions/swap';
 import toast from 'react-hot-toast';
 import { useContractRead } from 'wagmi'
-import { POOL_MANAGER_ADDRESS, USDC_ADDRESS } from '@/constant/address';
+import { SWAP_ROUTER_ADDRESS, USDC_ADDRESS } from '@/constant/address';
 import { USDC_ABI } from '@/constant/abis';
 import { useAccount } from "wagmi";
 type Props = {}
@@ -254,11 +254,13 @@ const Swap = (props: Props) => {
         address: USDC_ADDRESS,
         abi: USDC_ABI,
         functionName: 'allowance',
-        args: [address, POOL_MANAGER_ADDRESS],
+        args: [address, SWAP_ROUTER_ADDRESS],
         onSuccess: (data) => {
+            console.log('alloance data: ', data)
             setAllowance(Number(data))
         }
     })
+    console.log('allowance: ', allowanceData)
     useEffect(() => {
         if (!inTokenAmount && !outTokenAmount) return
         if (result.data) {
@@ -296,9 +298,9 @@ const Swap = (props: Props) => {
         const swapParams: SwapParams = [
 
             order == Order.ETH ? true : false,
-            100,
-            // order == Order.ETH ? ethers.parseEther(inTokenAmount) : parseInt((Number(inTokenAmount) * 10 ** 6).toString()),
-            1461446703485210103287273052203988822378723970342 / 1000
+            // 100,
+            Number(inTokenAmount) * 10 ** 18,
+            order == Order.ETH ? MIN_PRICE_LIMIT : MAX_PRICE_LIMIT
 
         ]
         const input = [
@@ -307,7 +309,7 @@ const Swap = (props: Props) => {
             ''
         ]
         try {
-            await swap(poolKey, swapParams, '')
+            await swap(poolKey, swapParams, Number(inTokenAmount) * 10 ** 18)
             toast.success('Successfully swapped your token')
         } catch (e) {
             console.log(e)

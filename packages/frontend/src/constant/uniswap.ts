@@ -9,3 +9,5 @@ export const poolKey: Key = [
     60,
     VANNA_HOOKS_ADDRESS as address
 ]
+export const MIN_PRICE_LIMIT = 4295128739 + 1
+export const MAX_PRICE_LIMIT = 1461446703485210103287273052203988822378723970342 - 1

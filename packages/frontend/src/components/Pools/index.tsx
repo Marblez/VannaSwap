@@ -6,6 +6,9 @@ import { BsArrowDownShort, BsArrowUpShort } from 'react-icons/bs';
 import { ethers } from 'ethers'
 import { gql, useClient, useQuery } from 'urql';
 import { std as calculateStandardDeviation } from 'mathjs'
+import { useContractRead } from 'wagmi';
+import { VOLATILITY_ORACLE_ADDRESS } from '@/constant/address';
+import { VOLATILITY_ORACLE_ABI } from '@/constant/abis';
 type Props = {}
 const PoolsContainer = styled.div`
     box-sizing: border-box;
@@ -49,11 +52,23 @@ const Pools = (props: Props) => {
     const client = useClient()
     const [blockNumber, setBlockNumber] = useState(0)
     const [volatilityArray, setVolatilityArray] = useState([])
+
     const fetchBlockNumber = async () => {
         const provider = new ethers.providers.JsonRpcProvider('https://docs-demo.quiknode.pro/')
         const _blockNumber = await provider.getBlockNumber()
         setBlockNumber(_blockNumber)
     }
+    const { data: volatilityFee } = useContractRead({
+        address: VOLATILITY_ORACLE_ADDRESS,
+        abi: VOLATILITY_ORACLE_ABI,
+        functionName: 'getVolatility',
+        args: [],
+        onSuccess: (data) => {
+            console.log('alloance data: ', data)
+            // setAllowance(Number(data))
+        }
+    })
+    console.log('volatilityFee', volatilityFee)
     const getVolatility = async (block: number) => {
         const queryPromise = []
         for (let currentBlock = block; currentBlock > block - 300; currentBlock = currentBlock - 15) {
