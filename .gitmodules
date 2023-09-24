@@ -7,3 +7,6 @@
 [submodule "packages/v4-periphery-vanna"]
 	path = packages/v4-periphery-vanna
 	url = https://github.com/EazyReal/v4-periphery-vanna.git
+[submodule "packages/v4-vanna"]
+	path = packages/v4-vanna
+	url = https://github.com/EazyReal/v4-vanna.git
