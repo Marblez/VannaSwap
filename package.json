@@ -6,8 +6,5 @@
     "packages/*"
   ],
   "repository": "https://github.com/Marblez/VannaSwap.git",
-  "license": "MIT",
-  "devDependencies": {
-    "hardhat": "^2.17.3"
-  }
+  "license": "MIT"
 }
