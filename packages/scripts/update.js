@@ -6,11 +6,9 @@ import { VOLATILITY_ORACLE_ABI, VOLATILITY_ORACLE_ADDRESS } from './constant.js'
 import dotenv from 'dotenv'
 dotenv.config()
 const updateFee = async () => {
-    console.log('Key: ', process.env.PRIVATE_KEY)
     const graphqlUrl = 'https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3'
     const provider = new ethers.providers.JsonRpcProvider('https://docs-demo.quiknode.pro/')
     const _blockNumber = await provider.getBlockNumber()
-    console.log('Block number:', _blockNumber)
     const pricePromises = []
     for (let currentBlock = _blockNumber; currentBlock > _blockNumber - 1000; currentBlock = currentBlock - 50) {
         pricePromises.push(fetch(graphqlUrl, {
@@ -48,7 +46,6 @@ const updateFee = async () => {
     volatilityArray.push(calculateStandardDeviation(prices.slice(0, 5)))
     volatilityArray.push(calculateStandardDeviation(prices.slice(0, 10)))
     volatilityArray.push(calculateStandardDeviation(prices.slice(0, 20)))
-    console.log("volatilityArray")
 
     const modelHash = "QmXQpupTphRTeXJMEz3BCt9YUF6kikcqExxPdcVoL1BBhy"
     const inputData = JSON.stringify([volatilityArray])
@@ -60,7 +57,6 @@ const updateFee = async () => {
     const vannaProvider = new ethers.providers.JsonRpcProvider('http://127.0.0.1:9545', network);
     const vannaWallet = new ethers.Wallet(process.env.PRIVATE_KEY || "", vannaProvider);
     const vannaContract = new ethers.Contract(VOLATILITY_ORACLE_ADDRESS, VOLATILITY_ORACLE_ABI, vannaWallet);
-    console.log(input)
     const tx = await vannaContract['setVolatility'](modelHash, inputData, {
         gasLimit: 10000000
     })
