@@ -357,7 +357,7 @@ const Swap = (props: Props) => {
 
                     }}>
                         <SwitchBox>
-                            <BsArrowDownShort size={25} />
+                            {order == Order.ETH ? <BsArrowDownShort size={25} /> : <BsArrowUpShort size={25} />}
                         </SwitchBox>
                     </SwitchContainer>
                     <div>

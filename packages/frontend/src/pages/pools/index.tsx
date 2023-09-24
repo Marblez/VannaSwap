@@ -1,35 +1,25 @@
+
+import dynamic from 'next/dynamic';
 import React from 'react'
-import styled from 'styled-components'
-
+import { IoIosAdd } from 'react-icons/io'
+const Pools = dynamic(() => import('@/components/Pools'), {
+    suspense: true, ssr: false
+});
 type Props = {}
-const PoolsContainer = styled.div`
-    box-sizing: border-box;
-    margin: 0px;
-    min-width: 0px;
-    border-radius: 16px;
-    padding: 1rem;
-    background-color: rgb(25, 27, 31);
-    width: 100%;
-`
-const TitleContainer = styled.div`
-    display: grid;
-    gap: 1em;
-    -webkit-box-align: center;
-    align-items: center;
-    grid-template-columns: 20px 3.5fr repeat(3, 1fr);
 
-`
 const index = (props: Props) => {
     return (
         <div className='flex justify-center items-center'>
             <div className='max-w-[1200px]' style={{ width: '90%' }}>
                 <div className='flex flex-col gap-[24px] text-[#c3c5cb]'>
-                    <div>All Pools</div>
-                    <PoolsContainer>
-                        <TitleContainer>
-
-                        </TitleContainer>
-                    </PoolsContainer>
+                    <div className='flex justify-between items-center'>
+                        <div>All Pools</div>
+                        <div className='flex items-center gap-2 bg-[#22d3ee] p-2 rounded-xl text-white text-md'>
+                            <IoIosAdd size={25} />
+                            <div>Add liquidity</div>
+                        </div>
+                    </div>
+                    <Pools />
                 </div>
             </div>
         </div>

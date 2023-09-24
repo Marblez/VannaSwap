@@ -18,6 +18,8 @@ import { WagmiConfig, configureChains, createConfig } from 'wagmi';
 import { localhost } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
 import { Client, Provider, cacheExchange, fetchExchange } from 'urql';
+import dynamic from 'next/dynamic'
+
 const APIURL = "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3"
 const client = new Client({
   url: APIURL,
