@@ -46,9 +46,26 @@ const toastOptions = {
   },
   loading: { className: "border border-yello-300" },
 };
-
+const vanna = {
+  id: 901,
+  name: "Vanna",
+  network: "Vanna",
+  nativeCurrency: {
+    decimals: 18,
+    name: "Ether",
+    symbol: "ETH",
+  },
+  rpcUrls: {
+    default: {
+      http: ["http://127.0.0.1:9545"],
+    },
+    public: {
+      http: ["http://127.0.0.1:9545"],
+    },
+  },
+}
 const { chains, publicClient } = configureChains(
-  [localhost],
+  [vanna],
   [
     publicProvider()
   ]

@@ -50,7 +50,7 @@ const Pools = (props: Props) => {
     const [blockNumber, setBlockNumber] = useState(0)
     const [volatilityArray, setVolatilityArray] = useState([])
     const fetchBlockNumber = async () => {
-        const provider = new ethers.JsonRpcProvider('https://docs-demo.quiknode.pro/')
+        const provider = new ethers.providers.JsonRpcProvider('https://docs-demo.quiknode.pro/')
         const _blockNumber = await provider.getBlockNumber()
         setBlockNumber(_blockNumber)
     }

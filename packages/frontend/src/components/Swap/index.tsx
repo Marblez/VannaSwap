@@ -4,7 +4,16 @@ import { MdSettings } from 'react-icons/md';
 import { BsArrowDownShort, BsArrowUpShort } from 'react-icons/bs';
 import Image from 'next/image';
 import { gql, useQuery } from 'urql';
+import { poolKey } from '@/constant/uniswap';
+import { ethers } from 'ethers';
+import { SwapParams, swap } from '@/utils/actions/swap';
+import toast from 'react-hot-toast';
+import { useContractRead } from 'wagmi'
+import { POOL_MANAGER_ADDRESS, USDC_ADDRESS } from '@/constant/address';
+import { USDC_ABI } from '@/constant/abis';
+import { useAccount } from "wagmi";
 type Props = {}
+
 const WidgetContainer = styled.div`
     padding: 68px 8px 0px;
     max-width: 480px;
@@ -221,6 +230,7 @@ const formatToken = (num: number) => {
 }
 const Swap = (props: Props) => {
     const [disabled, setDisabled] = useState(false)
+    const { address } = useAccount()
     const toggleButton = useCallback(() => {
         setDisabled((prev) => !prev)
     }, [])
@@ -233,11 +243,22 @@ const Swap = (props: Props) => {
     const [USDCPrice, setUSDCPrice] = useState(0)
     const [ethBalance, setEthBalance] = useState(3.13)
     const [usdcBalance, setUsdcBalance] = useState(2772.3)
+    const [allowance, setAllowance] = useState(0)
+
     const [order, setOrder] = useState(Order.ETH)
     const [result, reexecuteQuery] = useQuery({
         query: query,
     });
     const noInputAmount = !inTokenAmount || !outTokenAmount
+    const { data: allowanceData } = useContractRead({
+        address: USDC_ADDRESS,
+        abi: USDC_ABI,
+        functionName: 'allowance',
+        args: [address, POOL_MANAGER_ADDRESS],
+        onSuccess: (data) => {
+            setAllowance(Number(data))
+        }
+    })
     useEffect(() => {
         if (!inTokenAmount && !outTokenAmount) return
         if (result.data) {
@@ -270,6 +291,32 @@ const Swap = (props: Props) => {
         }
     }, [result, inTokenFocus, inTokenAmount, outTokenFocus, outTokenAmount, isFetching])
     // console.log(result)
+    const handleSwap = async () => {
+
+        const swapParams: SwapParams = [
+
+            order == Order.ETH ? true : false,
+            100,
+            // order == Order.ETH ? ethers.parseEther(inTokenAmount) : parseInt((Number(inTokenAmount) * 10 ** 6).toString()),
+            1461446703485210103287273052203988822378723970342 / 1000
+
+        ]
+        const input = [
+            poolKey,
+            swapParams,
+            ''
+        ]
+        try {
+            await swap(poolKey, swapParams, '')
+            toast.success('Successfully swapped your token')
+        } catch (e) {
+            console.log(e)
+            //@ts-ignore
+            toast.error('Failed to swap your token: ' + e.message)
+        }
+
+
+    }
     return (
         <WidgetContainer>
             <WidgetBox>
@@ -440,7 +487,7 @@ const Swap = (props: Props) => {
                         <button
                             className={`font-bold text-lg py-4 px-6 rounded-2xl w-full inline-flex items-center justify-center focus:outline-none border border-transparent transition duration-300 ease-in-out ${(noInputAmount || isFetching) ? 'bg-[#1b1b1b] text-[#9b9b9b] cursor-not-allowed' : 'bg-[#22d3ee] hover:opacity-80 text-white '}`}
                             disabled={noInputAmount || isFetching}
-                            onClick={toggleButton}>
+                            onClick={handleSwap}>
                             {noInputAmount ? "Enter a amount" : "Swap"}
                         </button>
                     </div>
