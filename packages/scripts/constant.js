@@ -84,4 +84,4 @@ export const VOLATILITY_ORACLE_ABI = [
         "type": "function"
     }
 ]
-export const VOLATILITY_ORACLE_ADDRESS = '0x8198f5d8F8CfFE8f9C413d98a0A55aEB8ab9FbB7'
+export const VOLATILITY_ORACLE_ADDRESS = '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0'
