@@ -26,9 +26,9 @@ const Header = (props: Props) => {
                     className='p-2 rounded-xl hover:bg-gray-400 hover:bg-opacity-20 cursor-pointer'
 
                     onClick={() => {
-                        router.push('/pool')
+                        router.push('/pools')
                     }}>
-                    Pool
+                    Pools
                 </div>
             </div>
             <ConnectButton />

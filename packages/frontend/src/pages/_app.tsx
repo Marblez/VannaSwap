@@ -17,6 +17,12 @@ import { Toaster } from "react-hot-toast";
 import { WagmiConfig, configureChains, createConfig } from 'wagmi';
 import { localhost } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
+import { Client, Provider, cacheExchange, fetchExchange } from 'urql';
+const APIURL = "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3"
+const client = new Client({
+  url: APIURL,
+  exchanges: [cacheExchange, fetchExchange],
+});
 const toastOptions = {
   style: {
     background: "rgba(0, 0, 0)",
@@ -81,7 +87,9 @@ export default function App({ Component, pageProps }: AppProps) {
       <RainbowKitProvider theme={midnightTheme()} chains={chains} appInfo={demoAppInfo}>
         <Toaster position="top-right" toastOptions={toastOptions} />
         <Header />
-        <Component {...pageProps} />
+        <Provider value={client}>
+          <Component {...pageProps} />
+        </Provider>
       </RainbowKitProvider>
     </WagmiConfig>
   )

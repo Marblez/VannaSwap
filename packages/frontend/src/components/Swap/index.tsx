@@ -1,9 +1,9 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { MdSettings } from 'react-icons/md';
 import { BsArrowDownShort, BsArrowUpShort } from 'react-icons/bs';
 import Image from 'next/image';
-
+import { gql, useQuery } from 'urql';
 type Props = {}
 const WidgetContainer = styled.div`
     padding: 68px 8px 0px;
@@ -168,11 +168,70 @@ const MaxButton = styled.button`
     padding: 4px 6px;
     pointer-events: initial;
 `
+const PriceContainer = styled.div`
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 16px;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    -webkit-box-pack: start;
+    justify-content: flex-start;
+`
+const PriceBox = styled.div`
+    width: 100%;
+    display: flex;
+    -webkit-box-align: center;
+    align-items: center;
+    cursor: pointer;
+    -webkit-box-pack: justify;
+    justify-content: space-between;
+`
+const Price = styled.div`
+    margin: 0px;
+    min-width: 0px;
+    font-weight: 485;
+    font-size: 14px;
+`
+enum Order {
+    ETH,
+    USDC
+}
+const query = gql`
+{
+    pool(id: "0x8ad599c3a0ff1de082011efddc58f1908eb6e6d8") {
+      token0Price
+      token1Price
+     
+    }
+  }
+  `
+const formatNumber = (num: number) => {
+    return num.toLocaleString('en-US', { maximumFractionDigits: 2 })
+}
+
 const Swap = (props: Props) => {
     const [disabled, setDisabled] = useState(false)
     const toggleButton = useCallback(() => {
         setDisabled((prev) => !prev)
     }, [])
+    const [isFetching, setIsFetching] = useState(false)
+    const [inTokenAmount, setInTokenAmount] = useState(0)
+    const [outTokenAmount, setOutTokenAmount] = useState(0)
+    const [ETHPrice, setETHPrice] = useState(0)
+    const [USDCPrice, setUSDCPrice] = useState(0)
+    const [ethBalance, setEthBalance] = useState(3.13)
+    const [usdcBalance, setUsdcBalance] = useState(2772.3)
+    const [order, setOrder] = useState(Order.ETH)
+    const [result, reexecuteQuery] = useQuery({
+        query: query,
+    });
+    useEffect(() => {
+        if (result.data) {
+            setETHPrice(result.data.pool.token0Price)
+            setUSDCPrice(result.data.pool.token1Price)
+            setIsFetching(false)
+        }
+    }, [result])
     return (
         <WidgetContainer>
             <WidgetBox>
@@ -196,16 +255,27 @@ const Swap = (props: Props) => {
                                         display: 'flex',
                                         flexGrow: 1,
                                     }}>
-                                    <StyledInput placeholder="0" />
+                                    <StyledInput placeholder="0" onChange={(value) => {
+                                        setInTokenAmount(Number(value.target.value))
+                                        setIsFetching(true)
+                                        reexecuteQuery()
+                                        setTimeout(() => {
+                                            setIsFetching(false)
+                                        }, 1000)
+                                    }} />
                                 </div>
                                 <div>
                                     <TokenContainer>
                                         <TokenBox>
                                             <IconBox>
-                                                <Image src='/eth-logo.png' width={24} height={24} alt='eth-logo' />
+                                                <Image src={
+                                                    order == Order.ETH ? '/eth-logo.png' : '/usdc-logo.png'
+                                                }
+                                                    width={24} height={24} alt='token-1-logo' />
                                             </IconBox>
                                             <div className='text-[20px]'>
-                                                ETH
+                                                {order == Order.ETH && "ETH"}
+                                                {order == Order.USDC && "USDC"}
                                             </div>
                                         </TokenBox>
                                     </TokenContainer>
@@ -215,16 +285,25 @@ const Swap = (props: Props) => {
                                 <NumberBox>
                                     <div></div>
                                     <BalanceBox>
-                                        <div>Balance: 3.13</div>
+                                        <div>Balance: {order == Order.ETH ?
+                                            formatNumber(ethBalance) : formatNumber(usdcBalance)
+                                        }</div>
                                         <MaxButton>Max</MaxButton>
                                     </BalanceBox>
                                 </NumberBox>
                             </NumberContainer>
                         </SwapInnerContainer>
                     </SwapContainer>
-                    <SwitchContainer>
+                    <SwitchContainer onClick={() => {
+                        if (order == Order.ETH) {
+                            setOrder(Order.USDC)
+                        }
+                        else {
+                            setOrder(Order.ETH)
+                        }
+                    }}>
                         <SwitchBox>
-                            <BsArrowDownShort />
+                            <BsArrowDownShort size={25} />
                         </SwitchBox>
                     </SwitchContainer>
                     <div>
@@ -239,16 +318,29 @@ const Swap = (props: Props) => {
                                             display: 'flex',
                                             flexGrow: 1,
                                         }}>
-                                        <StyledInput placeholder="0" />
+                                        <StyledInput placeholder="0"
+                                            onChange={(value) => {
+                                                setOutTokenAmount(Number(value.target.value))
+                                                //add a timeout to fetch data
+                                                if (isFetching) return
+                                                setIsFetching(true)
+                                                reexecuteQuery()
+                                                setTimeout(() => {
+                                                    setIsFetching(false)
+                                                }, 1000)
+                                            }}
+                                        />
                                     </div>
                                     <div>
                                         <TokenContainer>
                                             <TokenBox>
                                                 <IconBox>
-                                                    <Image src='/usdc-logo.png' width={24} height={24} alt='eth-logo' />
+                                                    <Image src={order == Order.ETH ? '/usdc-logo.png' : '/eth-logo.png'}
+                                                        width={24} height={24} alt='eth-logo' />
                                                 </IconBox>
                                                 <div className='text-[20px]'>
-                                                    USDC
+                                                    {order == Order.ETH && "USDC"}
+                                                    {order == Order.USDC && "ETH "}
                                                 </div>
                                             </TokenBox>
                                         </TokenContainer>
@@ -258,13 +350,22 @@ const Swap = (props: Props) => {
                                     <NumberBox>
                                         <div></div>
                                         <BalanceBox>
-                                            <div>Balance: 2,772.3</div>
+                                            <div>Balance: {
+                                                order == Order.ETH ?
+                                                    formatNumber(usdcBalance) : formatNumber(ethBalance)
+                                            }</div>
                                         </BalanceBox>
                                     </NumberBox>
                                 </NumberContainer>
                             </SwapInnerContainer>
                         </SwapContainer>
                     </div>
+                    <PriceContainer>
+                        <PriceBox>
+                            <Price>1 USDC = 0.00063 ETH </Price>
+                            <div></div>
+                        </PriceBox>
+                    </PriceContainer>
                     <div className='mt-2'>
                         <button
                             className={`bg-[#22d3ee] font-bold text-lg py-4 px-6 rounded-2xl w-full inline-flex items-center justify-center focus:outline-none border border-transparent transition duration-300 ease-in-out ${disabled ? 'bg-[#1b1b1b] text-[#9b9b9b] cursor-not-allowed' : 'hover:opacity-80 text-white '}`}

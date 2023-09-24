@@ -1,7 +1,9 @@
 
 import dynamic from 'next/dynamic'
 import React from 'react'
-const Swap = dynamic(() => import('@/components/Swap'), { suspense: true });
+const Swap = dynamic(() => import('@/components/Swap'), {
+    suspense: true, ssr: false
+});
 
 type Props = {}
 
